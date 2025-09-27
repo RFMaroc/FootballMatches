@@ -11,7 +11,14 @@ const allowedLeagues = [
 
 export default async function handler(req, res) {
   try {
-    const today = new Date().toISOString().split("T")[0];
+    // Utilisation de la date locale (Maroc / Europe)
+    const todayLocal = new Date();
+    const yyyy = todayLocal.getFullYear();
+    const mm = String(todayLocal.getMonth()+1).padStart(2,'0');
+    const dd = String(todayLocal.getDate()).padStart(2,'0');
+    const today = `${yyyy}-${mm}-${dd}`;
+
+    console.log("Date locale utilisée pour l'API :", today);
 
     const response = await fetch(`https://api-football-v1.p.rapidapi.com/v3/fixtures?date=${today}`, {
       method: "GET",
@@ -25,6 +32,8 @@ export default async function handler(req, res) {
     console.log("Réponse brute API :", JSON.stringify(data, null, 2));
 
     const matches = data.response ?? [];
+    console.log("Nombre de matchs bruts :", matches.length);
+
     const filteredMatches = matches.filter(match =>
       allowedLeagues.some(league => Number(league.id) === Number(match.league.id))
     );
