@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>⚽ Matchs du jour</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    th { background: #f4f4f4; }
+  </style>
+</head>
+<body>
+  <h1>⚽ Matchs du jour</h1>
+  <table id="matches">
+    <tr>
+      <th>Compétition</th>
+      <th>Domicile</th>
+      <th>Extérieur</th>
+      <th>Score</th>
+      <th>Statut</th>
+    </tr>
+  </table>
+
+  <script>
+    async function loadMatches() {
+      let res = await fetch("/api/matches");
+      let data = await res.json();
+
+      let table = document.getElementById("matches");
+      table.innerHTML = `<tr>
+        <th>Compétition</th>
+        <th>Domicile</th>
+        <th>Extérieur</th>
+        <th>Score</th>
+        <th>Statut</th>
+      </tr>`;
+
+      data.response.forEach(m => {
+        let league = m.league.name;
+        let home = m.teams.home.name;
+        let away = m.teams.away.name;
+        let score = `${m.goals.home ?? "-"} : ${m.goals.away ?? "-"}`;
+        let status = m.fixture.status.short;
+
+        table.innerHTML += `<tr>
+          <td>${league}</td>
+          <td>${home}</td>
+          <td>${away}</td>
+          <td>${score}</td>
+          <td>${status}</td>
+        </tr>`;
+      });
+    }
+
+    setInterval(loadMatches, 30000);
+    loadMatches();
+  </script>
+</body>
+</html>
