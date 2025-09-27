@@ -8,8 +8,8 @@
 </head>
 <body class="bg-gray-50 font-sans">
 
-<header class="bg-blue-700 text-white p-4 text-center text-2xl font-bold shadow">
-  Matchs du jour ⚽
+<header class="bg-green-700 text-white p-4 text-center text-2xl font-bold shadow">
+  Matchs du jour ⚽ - Test clé
 </header>
 
 <main class="p-4">
@@ -23,8 +23,8 @@ async function loadMatches() {
   const container = document.getElementById('matches');
   console.log("Matches reçus :", matches);
 
-  if(matches.length === 0) {
-    container.innerHTML = `<p class="text-center text-gray-500 font-semibold text-lg mt-10">Aucun match prévu aujourd'hui.</p>`;
+  if(!matches || matches.length === 0) {
+    container.innerHTML = `<p class="text-center text-gray-500 font-semibold text-lg mt-10">Aucun match ou problème clé API.</p>`;
     return;
   }
 
