@@ -1,8 +1,11 @@
 {
   "name": "football-matches",
   "version": "1.0.0",
+  "main": "api/matches.js",
   "scripts": {
-    "dev": "vercel dev",
     "start": "vercel dev"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.2"
   }
 }

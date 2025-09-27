@@ -2,59 +2,64 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>⚽ Matchs du jour</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-    th { background: #f4f4f4; }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matchs du jour</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <h1>⚽ Matchs du jour</h1>
-  <table id="matches">
-    <tr>
-      <th>Compétition</th>
-      <th>Domicile</th>
-      <th>Extérieur</th>
-      <th>Score</th>
-      <th>Statut</th>
-    </tr>
-  </table>
+<body class="bg-gray-100 text-gray-800 font-sans">
+
+  <header class="bg-blue-900 text-white p-4 text-center text-xl font-bold">
+    Matchs du jour
+  </header>
+
+  <main class="p-4">
+    <div id="matches" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
+  </main>
 
   <script>
     async function loadMatches() {
-      let res = await fetch("/api/matches");
-      let data = await res.json();
+      const res = await fetch('/api/matches');
+      const matches = await res.json();
+      const container = document.getElementById('matches');
 
-      let table = document.getElementById("matches");
-      table.innerHTML = `<tr>
-        <th>Compétition</th>
-        <th>Domicile</th>
-        <th>Extérieur</th>
-        <th>Score</th>
-        <th>Statut</th>
-      </tr>`;
+      if(matches.length === 0) {
+        container.innerHTML = `<p class="text-center col-span-full">Aucun match aujourd'hui.</p>`;
+        return;
+      }
 
-      data.response.forEach(m => {
-        let league = m.league.name;
-        let home = m.teams.home.name;
-        let away = m.teams.away.name;
-        let score = `${m.goals.home ?? "-"} : ${m.goals.away ?? "-"}`;
-        let status = m.fixture.status.short;
+      container.innerHTML = matches.map(match => {
+        const homeScore = match.score.fulltime.home ?? "-";
+        const awayScore = match.score.fulltime.away ?? "-";
+        const matchTime = new Date(match.fixture.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
-        table.innerHTML += `<tr>
-          <td>${league}</td>
-          <td>${home}</td>
-          <td>${away}</td>
-          <td>${score}</td>
-          <td>${status}</td>
-        </tr>`;
-      });
+        return `
+        <div class="bg-white p-4 rounded-lg shadow hover:shadow-lg transition duration-300">
+          <div class="flex justify-between items-center mb-2">
+            <div class="flex items-center gap-2">
+              <img src="\${match.teams.home.logo}" alt="\${match.teams.home.name}" class="w-10 h-10">
+              <span class="font-semibold">\${match.teams.home.name}</span>
+            </div>
+
+            <span class="font-bold text-lg">\${homeScore} - \${awayScore}</span>
+
+            <div class="flex items-center gap-2">
+              <span class="font-semibold">\${match.teams.away.name}</span>
+              <img src="\${match.teams.away.logo}" alt="\${match.teams.away.name}" class="w-10 h-10">
+            </div>
+          </div>
+
+          <div class="text-sm text-gray-500 flex justify-between">
+            <span>\${match.league.name}</span>
+            <span>\${matchTime}</span>
+          </div>
+        </div>`;
+      }).join('');
     }
 
-    setInterval(loadMatches, 30000);
     loadMatches();
+    // Rafraîchissement toutes les 5 minutes
+    setInterval(loadMatches, 300000);
   </script>
+
 </body>
 </html>

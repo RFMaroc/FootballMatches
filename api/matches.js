@@ -1,18 +1,34 @@
-export default async function handler(req, res) {
-  const today = new Date().toISOString().split("T")[0];
+import fetch from "node-fetch";
 
-  const url = `https://api-football-v1.p.rapidapi.com/v3/fixtures?date=${today}`;
+const allowedLeagues = [
+  { id: 39, name: "Premier League" },
+  { id: 140, name: "La Liga" },
+  { id: 135, name: "Serie A" },
+  { id: 78, name: "Bundesliga" },
+  { id: 61, name: "Ligue 1" },
+  { id: 250, name: "Botola Pro" }
+];
+
+export default async function handler(req, res) {
   try {
-    const response = await fetch(url, {
+    const today = new Date().toISOString().split("T")[0];
+    const response = await fetch(`https://api-football-v1.p.rapidapi.com/v3/fixtures?date=${today}`, {
+      method: "GET",
       headers: {
-        "X-RapidAPI-Key": process.env.RAPIDAPI_KEY,
+        "X-RapidAPI-Key": process.env.API_FOOTBALL_KEY,
         "X-RapidAPI-Host": "api-football-v1.p.rapidapi.com"
       }
     });
 
     const data = await response.json();
-    res.status(200).json(data);
+
+    const filteredMatches = data.response.filter(match =>
+      allowedLeagues.some(league => league.id === match.league.id)
+    );
+
+    res.status(200).json(filteredMatches);
   } catch (err) {
-    res.status(500).json({ error: "Erreur API", details: err.message });
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch matches" });
   }
 }
