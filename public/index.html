@@ -6,14 +6,14 @@
   <title>Matchs du jour</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 text-gray-800 font-sans">
+<body class="bg-gray-50 font-sans">
 
-<header class="bg-blue-900 text-white p-4 text-center text-xl font-bold">
-  Matchs du jour
+<header class="bg-gradient-to-r from-red-600 via-red-500 to-red-600 text-white p-4 text-center text-2xl font-bold shadow">
+  Matchs du jour ⚽
 </header>
 
 <main class="p-4">
-  <div id="matches" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
+  <div id="matches" class="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3"></div>
 </main>
 
 <script>
@@ -21,9 +21,10 @@ async function loadMatches() {
   const res = await fetch('/api/matches');
   const matches = await res.json();
   const container = document.getElementById('matches');
+  console.log("Matches reçus :", matches);
 
   if(matches.length === 0) {
-    container.innerHTML = `<p class="text-center col-span-full">Aucun match aujourd'hui.</p>`;
+    container.innerHTML = `<p class="text-center col-span-full text-gray-500 font-semibold text-lg mt-10">Aucun match prévu aujourd'hui.</p>`;
     return;
   }
 
@@ -33,22 +34,22 @@ async function loadMatches() {
     const matchTime = new Date(match.fixture.date).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
 
     return `
-    <div class="bg-white p-4 rounded-lg shadow hover:shadow-lg transition duration-300">
-      <div class="flex justify-between items-center mb-2">
-        <div class="flex items-center gap-2">
-          <img src="${match.teams.home.logo}" alt="${match.teams.home.name}" class="w-10 h-10">
-          <span class="font-semibold">${match.teams.home.name}</span>
+    <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition p-4 flex flex-col justify-between">
+      <div class="flex justify-between items-center mb-4">
+        <div class="flex items-center gap-3">
+          <img src="${match.teams.home.logo}" alt="${match.teams.home.name}" class="w-12 h-12">
+          <span class="font-semibold text-lg">${match.teams.home.name}</span>
         </div>
 
-        <span class="font-bold text-lg">${homeScore} - ${awayScore}</span>
+        <span class="font-bold text-xl">${homeScore} - ${awayScore}</span>
 
-        <div class="flex items-center gap-2">
-          <span class="font-semibold">${match.teams.away.name}</span>
-          <img src="${match.teams.away.logo}" alt="${match.teams.away.name}" class="w-10 h-10">
+        <div class="flex items-center gap-3">
+          <span class="font-semibold text-lg">${match.teams.away.name}</span>
+          <img src="${match.teams.away.logo}" alt="${match.teams.away.name}" class="w-12 h-12">
         </div>
       </div>
 
-      <div class="text-sm text-gray-500 flex justify-between">
+      <div class="flex justify-between text-sm text-gray-500">
         <span>${match.league.name} (ID: ${match.league.id})</span>
         <span>${matchTime}</span>
       </div>

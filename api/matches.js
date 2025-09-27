@@ -1,12 +1,12 @@
 import fetch from "node-fetch";
 
 const allowedLeagues = [
-  { id: 39, name: "Premier League" }, // Angleterre
-  { id: 140, name: "La Liga" },       // Espagne
-  { id: 135, name: "Serie A" },       // Italie
-  { id: 78, name: "Bundesliga" },     // Allemagne
-  { id: 61, name: "Ligue 1" },        // France
-  { id: 250, name: "Botola Pro" }     // Maroc
+  { id: 39, name: "Premier League" },
+  { id: 140, name: "La Liga" },
+  { id: 135, name: "Serie A" },
+  { id: 78, name: "Bundesliga" },
+  { id: 61, name: "Ligue 1" },
+  { id: 250, name: "Botola Pro" }
 ];
 
 export default async function handler(req, res) {
@@ -22,11 +22,15 @@ export default async function handler(req, res) {
     });
 
     const data = await response.json();
+    console.log("Réponse brute API :", JSON.stringify(data, null, 2));
 
-    // Filtrage type-safe
-    const filteredMatches = data.response.filter(match =>
+    const matches = data.response ?? [];
+    const filteredMatches = matches.filter(match =>
       allowedLeagues.some(league => Number(league.id) === Number(match.league.id))
     );
+
+    console.log("Nombre de matchs filtrés :", filteredMatches.length);
+    filteredMatches.forEach(m => console.log(m.league.id, m.league.name));
 
     res.status(200).json(filteredMatches);
   } catch (err) {
