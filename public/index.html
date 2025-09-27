@@ -8,8 +8,8 @@
 </head>
 <body class="bg-gray-50 font-sans">
 
-<header class="bg-green-700 text-white p-4 text-center text-2xl font-bold shadow">
-  Matchs du jour ⚽ - Test clé
+<header class="bg-blue-700 text-white p-4 text-center text-2xl font-bold shadow">
+  Matchs du jour ⚽
 </header>
 
 <main class="p-4">
@@ -18,47 +18,51 @@
 
 <script>
 async function loadMatches() {
-  const res = await fetch('/api/matches');
-  const matches = await res.json();
-  const container = document.getElementById('matches');
-  console.log("Matches reçus :", matches);
+  try {
+    const res = await fetch('/api/matches');
+    const matches = await res.json();
+    const container = document.getElementById('matches');
+    console.log("Matches reçus :", matches);
 
-  if(!matches || matches.length === 0) {
-    container.innerHTML = `<p class="text-center text-gray-500 font-semibold text-lg mt-10">Aucun match ou problème clé API.</p>`;
-    return;
+    if (!matches || matches.length === 0) {
+      container.innerHTML = `<p class="text-center text-gray-500 font-semibold text-lg mt-10">Aucun match prévu aujourd'hui.</p>`;
+      return;
+    }
+
+    container.innerHTML = matches.map(match => {
+      const homeScore = match.goals.home ?? "-";
+      const awayScore = match.goals.away ?? "-";
+      const matchTime = new Date(match.fixture.date).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+
+      return `
+      <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition p-4 flex flex-col justify-between">
+        <div class="flex justify-between items-center mb-4">
+          <div class="flex items-center gap-3">
+            <img src="${match.teams.home.logo}" alt="${match.teams.home.name}" class="w-12 h-12">
+            <span class="font-semibold text-lg">${match.teams.home.name}</span>
+          </div>
+
+          <span class="font-bold text-xl">${homeScore} - ${awayScore}</span>
+
+          <div class="flex items-center gap-3">
+            <span class="font-semibold text-lg">${match.teams.away.name}</span>
+            <img src="${match.teams.away.logo}" alt="${match.teams.away.name}" class="w-12 h-12">
+          </div>
+        </div>
+
+        <div class="flex justify-between text-sm text-gray-500">
+          <span>${match.league.name}</span>
+          <span>${matchTime}</span>
+        </div>
+      </div>`;
+    }).join('');
+  } catch (err) {
+    console.error("Erreur frontend :", err);
   }
-
-  container.innerHTML = matches.map(match => {
-    const homeScore = match.goals.home ?? "-";
-    const awayScore = match.goals.away ?? "-";
-    const matchTime = new Date(match.fixture.date).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-
-    return `
-    <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition p-4 flex flex-col justify-between">
-      <div class="flex justify-between items-center mb-4">
-        <div class="flex items-center gap-3">
-          <img src="${match.teams.home.logo}" alt="${match.teams.home.name}" class="w-12 h-12">
-          <span class="font-semibold text-lg">${match.teams.home.name}</span>
-        </div>
-
-        <span class="font-bold text-xl">${homeScore} - ${awayScore}</span>
-
-        <div class="flex items-center gap-3">
-          <span class="font-semibold text-lg">${match.teams.away.name}</span>
-          <img src="${match.teams.away.logo}" alt="${match.teams.away.name}" class="w-12 h-12">
-        </div>
-      </div>
-
-      <div class="flex justify-between text-sm text-gray-500">
-        <span>${match.league.name} (ID: ${match.league.id})</span>
-        <span>${matchTime}</span>
-      </div>
-    </div>`;
-  }).join('');
 }
 
 loadMatches();
-setInterval(loadMatches, 300000);
+setInterval(loadMatches, 300000); // rafraîchissement toutes les 5 min
 </script>
 
 </body>
