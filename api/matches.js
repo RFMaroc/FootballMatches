@@ -1,32 +1,29 @@
 import fetch from "node-fetch";
 
 export default async function handler(req, res) {
+  const today = new Date().toISOString().split("T")[0];
+  const leagues = [39, 140, 135, 78, 61, 250]; // IDs championnats
+  const apiKey = process.env.RAPIDAPI_KEY;
+
+  if (!apiKey) {
+    return res.status(500).json({ error: "Clé API manquante" });
+  }
+
   try {
-    const today = new Date().toISOString().split("T")[0];
+    const promises = leagues.map(id =>
+      fetch(`https://api-football-v1.p.rapidapi.com/v3/fixtures?date=${today}&league=${id}`, {
+        headers: {
+          "X-RapidAPI-Key": apiKey,
+          "X-RapidAPI-Host": "api-football-v1.p.rapidapi.com"
+        }
+      }).then(res => res.json())
+    );
 
-    const apiKey = process.env.RAPIDAPI_KEY;
-    if (!apiKey) {
-      console.error("Variable d'environnement RAPIDAPI_KEY non définie !");
-      return res.status(500).json({ error: "Variable RAPIDAPI_KEY non définie" });
-    }
-
-    const url = `https://api-football-v1.p.rapidapi.com/v3/fixtures?date=${today}`;
-    const response = await fetch(url, {
-      headers: {
-        "X-RapidAPI-Key": apiKey,
-        "X-RapidAPI-Host": "api-football-v1.p.rapidapi.com"
-      }
-    });
-
-    const data = await response.json();
-    console.log("Réponse brute API :", JSON.stringify(data, null, 2));
-
-    const matches = data.response ?? [];
-    console.log("IDs et noms des ligues :", matches.map(m => `${m.league.id} - ${m.league.name}`));
+    const results = await Promise.all(promises);
+    const matches = results.flatMap(r => r.response ?? []);
 
     res.status(200).json(matches);
   } catch (err) {
-    console.error("Erreur fetch API :", err);
     res.status(500).json({ error: "Erreur API", details: err.message });
   }
 }
