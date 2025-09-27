@@ -1,49 +1,26 @@
 import fetch from "node-fetch";
 
-const allowedLeagues = [
-  { id: 39, name: "Premier League" },
-  { id: 140, name: "La Liga" },
-  { id: 135, name: "Serie A" },
-  { id: 78, name: "Bundesliga" },
-  { id: 61, name: "Ligue 1" },
-  { id: 250, name: "Botola Pro" }
-];
-
 export default async function handler(req, res) {
   try {
-    // Utilisation de la date locale (Maroc / Europe)
-    const todayLocal = new Date();
-    const yyyy = todayLocal.getFullYear();
-    const mm = String(todayLocal.getMonth()+1).padStart(2,'0');
-    const dd = String(todayLocal.getDate()).padStart(2,'0');
-    const today = `${yyyy}-${mm}-${dd}`;
+    const today = new Date().toISOString().split("T")[0];
 
-    console.log("Date locale utilisée pour l'API :", today);
-
-    const response = await fetch(`https://api-football-v1.p.rapidapi.com/v3/fixtures?date=${today}`, {
-      method: "GET",
+    const url = `https://api-football-v1.p.rapidapi.com/v3/fixtures?date=${today}`;
+    const response = await fetch(url, {
       headers: {
-        "X-RapidAPI-Key": process.env.API_FOOTBALL_KEY,
+        "X-RapidAPI-Key": process.env.RAPIDAPI_KEY,
         "X-RapidAPI-Host": "api-football-v1.p.rapidapi.com"
       }
     });
 
     const data = await response.json();
+
     console.log("Réponse brute API :", JSON.stringify(data, null, 2));
+    console.log("IDs et noms des ligues :", data.response.map(m => `${m.league.id} - ${m.league.name}`));
 
     const matches = data.response ?? [];
-    console.log("Nombre de matchs bruts :", matches.length);
-
-    const filteredMatches = matches.filter(match =>
-      allowedLeagues.some(league => Number(league.id) === Number(match.league.id))
-    );
-
-    console.log("Nombre de matchs filtrés :", filteredMatches.length);
-    filteredMatches.forEach(m => console.log(m.league.id, m.league.name));
-
-    res.status(200).json(filteredMatches);
+    res.status(200).json(matches);
   } catch (err) {
     console.error("Erreur fetch API :", err);
-    res.status(500).json({ error: "Impossible de récupérer les matchs" });
+    res.status(500).json({ error: "Erreur API", details: err.message });
   }
 }

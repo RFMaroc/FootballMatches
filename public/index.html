@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Matchs du jour</title>
+  <title>⚽ Matchs du jour</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 font-sans">
 
-<header class="bg-gradient-to-r from-purple-600 via-purple-500 to-purple-600 text-white p-4 text-center text-2xl font-bold shadow">
+<header class="bg-blue-700 text-white p-4 text-center text-2xl font-bold shadow">
   Matchs du jour ⚽
 </header>
 
@@ -24,13 +24,13 @@ async function loadMatches() {
   console.log("Matches reçus :", matches);
 
   if(matches.length === 0) {
-    container.innerHTML = `<p class="text-center col-span-full text-gray-500 font-semibold text-lg mt-10">Aucun match prévu aujourd'hui.</p>`;
+    container.innerHTML = `<p class="text-center text-gray-500 font-semibold text-lg mt-10">Aucun match prévu aujourd'hui.</p>`;
     return;
   }
 
   container.innerHTML = matches.map(match => {
-    const homeScore = match.score.fulltime.home ?? "-";
-    const awayScore = match.score.fulltime.away ?? "-";
+    const homeScore = match.goals.home ?? "-";
+    const awayScore = match.goals.away ?? "-";
     const matchTime = new Date(match.fixture.date).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
 
     return `
