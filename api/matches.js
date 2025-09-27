@@ -23,7 +23,7 @@ export default async function handler(req, res) {
     const data = await response.json();
 
     const filteredMatches = data.response.filter(match =>
-      allowedLeagues.some(league => league.id === match.league.id)
+      allowedLeagues.some(league => Number(league.id) === Number(match.league.id))
     );
 
     res.status(200).json(filteredMatches);
